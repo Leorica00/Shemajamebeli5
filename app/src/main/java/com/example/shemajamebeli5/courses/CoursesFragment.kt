@@ -10,17 +10,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shemajamebeli5.BaseFragment
 import com.example.shemajamebeli5.courses.adapter.ActiveCoursesRecyclerAdapter
+import com.example.shemajamebeli5.courses.adapter.CoursesOuterRecyclerAdapter
 import com.example.shemajamebeli5.courses.adapter.NewCoursesRecyclerAdapter
+import com.example.shemajamebeli5.courses.model.CourseItem
 import com.example.shemajamebeli5.databinding.FragmentCoursesBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
 class CoursesFragment : BaseFragment<FragmentCoursesBinding>(FragmentCoursesBinding::inflate) {
-
-    private lateinit var newCoursesAdapter: NewCoursesRecyclerAdapter
-    private lateinit var activeCoursesAdapter: ActiveCoursesRecyclerAdapter
-
+    private val outerRecyclerAdapter = CoursesOuterRecyclerAdapter()
     private val coursesViewModel: ActiveCoursesViewModel by viewModels()
 
     override fun setUp() {
@@ -28,18 +27,9 @@ class CoursesFragment : BaseFragment<FragmentCoursesBinding>(FragmentCoursesBind
     }
 
     private fun setUpRecyclers() {
-        with(binding.recyclerNewCourses) {
-            layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
-            adapter = NewCoursesRecyclerAdapter().apply {
-                newCoursesAdapter = this
-            }
-        }
-
-        with(binding.recyclerActiveCourses) {
+        with(binding.recyclerCoursesContainer) {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = ActiveCoursesRecyclerAdapter().apply {
-                activeCoursesAdapter = this
-            }
+            adapter = outerRecyclerAdapter
         }
     }
 
@@ -60,8 +50,8 @@ class CoursesFragment : BaseFragment<FragmentCoursesBinding>(FragmentCoursesBind
             }
 
             is CourseState.Success -> {
-                newCoursesAdapter.submitList(resource.newCourses)
-                activeCoursesAdapter.submitList(resource.actCourses)
+                val courseItemList = listOf(CourseItem.NewCourse(resource.nCourses), CourseItem.ActiveCourse(resource.actCourses))
+                outerRecyclerAdapter.submitList(courseItemList)
                 binding.progressBarCourses.visibility = View.GONE
             }
 
